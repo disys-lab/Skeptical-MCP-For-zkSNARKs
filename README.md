@@ -92,7 +92,7 @@ The repository also hosts an **ablation study** — four main configurations (A/
 - **Just want to run it?** → [Quick start](#quick-start) · [Example queries](#example-queries). That's all you need — stop after step 4.
 - **Reproducing the research / ablation study?** → [Ablation configs](#ablation-study--configurations) · [Test suite](#running-the-ablation-test-suite) · [Grading](#grading-results) · [Sweeps](#multi-model--multi-config-sweeps)
 - **Here for the paper's artifacts?** → [Paper and artifact map](#paper-and-artifact-map) · [Reproduce the numbers offline](#reproducing-the-papers-numbers-offline) · [Models and providers](#models-and-providers) · [Deviations and known issues](#deviations-and-known-issues)
-- **Reference:** [Endpoints](#key-endpoints) · [Schema](#schema) · [Security](#security-notes) · [Config vars](#configuration-reference) · [Repo layout](#repository-layout) · [Architecture deep-dive (`ARCHITECTURE.md`)](#further-reading)
+- **Reference:** [Endpoints](#key-endpoints) · [Schema](#schema) · [Security](#security-notes) · [Config vars](#configuration-reference) · [Unit tests](#tests) · [Repo layout](#repository-layout) · [Architecture deep-dive (`ARCHITECTURE.md`)](#further-reading)
 
 ## Paper and artifact map
 
@@ -355,6 +355,36 @@ See [Deviations and known issues](#deviations-and-known-issues).
 `eval/expected_output.txt` is the output as saved at release. Figures marked **[H]** in the
 output were established by hand-reading the dumps in `reports/` and are reported, not recomputed.
 Only the standard library and the two graders in `eval/` are needed.
+
+## Tests
+
+`tests/` holds unit tests for the skeptical checks. They run on every push and pull request
+(the `unit-tests` job in `.github/workflows/reproduce.yml`) and need no network, LLM, CoSMeTIC
+or Docker: Redis is replaced by `fakeredis`, the prover APIs by a fake prover, and the
+configuration is set per test.
+
+| Check | What the tests confirm |
+|---|---|
+| A3 identity | The interceptor drops a model-supplied `user_id` and injects the session identity in Configs B, C and D; A and A* let the model's value through |
+| D1 session lock | A session claimed by one user rejects another user, also through the `/get` endpoint; the lock fails closed when Redis is down |
+| A1 proof types | Spellings such as `ks` and `kolmogorov-smirnov` map to the canonical names and to the right prover port |
+| B4 job-ID fallback | A missing job ID falls back to the latest job in Configs B, C and D, but not in A |
+| B5 stored proof type | `check_status` completes a missing proof type from the stored job (Configs C, D); Config B reproduces the wrong-port failure; `download_proof` and `verify_proof` override the model's value with the stored one; without a proof type, A and B return "proof_type is required" |
+| B6 auto-detection | Download and verify probe all three provers, pick the one holding the job, prefer LRT then KS, and fall back to logistic accuracy when none has it |
+| C5 and D4 downloads | Error text saved as a proof file is rejected; empty files are rejected; filenames cannot leave the downloads folder, on the MCP side or in the backend route |
+| C1 and Config D | Trust labels follow the tool results; Config D templates report the tool output |
+
+Two known issues are recorded as expected failures rather than hidden: `_normalize_proof_type`
+does not accept "likelihood ratio test" with spaces, and on Windows the error-file check in
+`download_proof` fails because the file is deleted while still open (it passes on Linux, where
+the service runs). Note also that in Configs C and D, download and verify fall back to logistic
+accuracy when no prover has the job, so "return an error rather than guessing" (paper, Sec. III-C)
+holds for Configs A and B only.
+
+```bash
+pip install -r requirements.txt -r tests/requirements-test.txt
+python -m pytest tests -q
+```
 
 ## Models and providers
 
