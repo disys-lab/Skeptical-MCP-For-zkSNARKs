@@ -1,5 +1,6 @@
 # Natural-Language Zero-Knowledge Verification via Skeptical MCP Tools
 
+[![Reproduce paper numbers](https://github.com/disys-lab/Skeptical-MCP-For-zkSNARKs/actions/workflows/reproduce.yml/badge.svg)](https://github.com/disys-lab/Skeptical-MCP-For-zkSNARKs/actions/workflows/reproduce.yml)
 ![Code: MIT](https://img.shields.io/badge/code-MIT-blue)
 ![Data: CC BY 4.0](https://img.shields.io/badge/data-CC%20BY%204.0-lightgrey)
 ![Paper: under review](https://img.shields.io/badge/paper-under%20review%2C%20IEEE%20BigData%202026-orange)
