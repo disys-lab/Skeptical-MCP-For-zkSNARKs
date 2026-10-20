@@ -33,3 +33,18 @@ jobs:
         run: |
           pip install -r docs/requirements-docs.txt
           python docs/make_charts.py
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install runtime and test dependencies
+        run: pip install -r requirements.txt -r tests/requirements-test.txt
+
+      - name: Unit tests for the skeptical checks (no network, LLM, CoSMeTIC or Docker)
+        run: python -m pytest tests -q -rx
