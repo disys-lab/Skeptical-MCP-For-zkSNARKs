@@ -262,7 +262,7 @@ Every figure in the paper's tables and prose that derives from the logs can be r
 
 ```bash
 python eval/reproduce_paper_numbers.py                     # prints every derived figure with its definition
-python eval/reproduce_paper_numbers.py > out.txt && diff out.txt eval/expected_output.txt
+python eval/reproduce_paper_numbers.py > out.txt && diff --strip-trailing-cr out.txt eval/expected_output.txt
 python eval/test_grading_faithfulness_v2.py                # four synthetic controls; hand-label agreement 150 of 151
 ```
 
@@ -310,6 +310,11 @@ Stated plainly, because a reader of the code would otherwise infer the opposite.
   `[[0.0, 0.0, 0.0]]`, so proofs are not tied to individual verification requests. Hashes are
   scrubbed only at display time; tool outputs, including dataset hashes, job identifiers and the
   account UUID, reach the model provider in every configuration.
+- **Checksums of two text files.** The release recorded the SHA-256 of `eval/expected_output.txt`
+  and `results/RESULTS_MANIFEST.csv` from Windows copies (CRLF line endings), so `sha256sum -c`
+  failed for those two files on Linux and macOS. `SHA256SUMS.txt` now lists their checksums as
+  stored in Git (LF), and `.gitattributes` checks both out with LF on every system. The file
+  contents are unchanged.
 - **Data.** All accounts are synthetic (`User1` to `User54`, seeded at run time from CoSMeTIC's
   synthetic input files); one generated test-account UUID appears in the logs.
   No real participant or patient data exists anywhere in this repository.
