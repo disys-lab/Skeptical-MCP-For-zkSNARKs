@@ -1,5 +1,85 @@
 # Natural-Language Zero-Knowledge Verification via Skeptical MCP Tools
 
+[![Reproduce paper numbers](https://github.com/disys-lab/Skeptical-MCP-For-zkSNARKs/actions/workflows/reproduce.yml/badge.svg)](https://github.com/disys-lab/Skeptical-MCP-For-zkSNARKs/actions/workflows/reproduce.yml)
+![Code: MIT](https://img.shields.io/badge/code-MIT-blue)
+![Data: CC BY 4.0](https://img.shields.io/badge/data-CC%20BY%204.0-lightgrey)
+![Paper: under review](https://img.shields.io/badge/paper-under%20review%2C%20IEEE%20BigData%202026-orange)
+
+**An LLM agent that lets non-experts run and verify zero-knowledge proofs in plain English, plus an ablation study showing that tools which check, complete or override what the model sends raise task completion by about 23 points across three model families.**
+
+[Paper](manuscript/) · [Reproduce every number offline](#reproducing-the-papers-numbers-offline) · [Architecture deep-dive](ARCHITECTURE.md)
+
+## The idea in one minute
+
+An LLM is good at understanding what a user wants. It is not reliable at supplying exact values such as job IDs, proof types and user identities. In a zero-knowledge system those values decide *which* statistical test is proven and *whose* data the proof is bound to, so a small slip can produce a valid proof of the wrong thing.
+
+**Skeptical tools** do not trust what the model sends. Each MCP tool checks the model's arguments against server-side state before it runs, using three moves:
+
+| Move | What the tool does | Example in this repo |
+|---|---|---|
+| **Validate** | Reject a bad value with a clear error | `verify_proof` returns "proof type is required" instead of guessing a prover |
+| **Complete** | Fill a missing value from stored state | `check_status` takes the proof type from the stored job when the model leaves it out |
+| **Override** | Replace the model's value with the server's | The interceptor strips any model-supplied `user_id` and injects the real session identity |
+
+The system has 20 such design decisions in four groups: input skepticism, state independence, output integrity and security boundaries. Five of them are switched on and off in the ablation below.
+
+## Results at a glance
+
+Task completion on the 75-query suite (mean of 5 runs at temperature 0; 375 records per model per configuration; 6,000+ query executions and 6,371 records in total):
+
+| Model | A: trust the LLM | B | C | D: full system | Gain (A→D) |
+|---|---|---|---|---|---|
+| Qwen 3 32B | 70.2% | 84.5% | 90.3% | **93.0%** | +22.8 |
+| Mistral Small 3.2 24B* | 65.1% | 79.7% | 80.5% | **88.4%** | +23.3 |
+| Llama 3 8B | 54.9% | 69.3% | 68.1% | **78.1%** | +23.2 |
+
+<p align="center">
+  <img src="docs/task_completion.png" width="640" alt="Grouped bar chart of task completion for configurations A to D across three models.">
+</p>
+
+\* Mistral's reference job never reached `done` in Configs B, C, D and A*, so its status and download cells are not comparable with the other models. Within-model gains are unaffected. See [Deviations and known issues](#deviations-and-known-issues).
+
+## What we found
+
+- **A plausible default is worse than no default.** With the stored proof type turned off, `check_status` silently defaulted to one prover and sent **198** status checks to the wrong one. Storing the proof type server-side cut this to **0** for all three models. `verify_proof`, which has no default, never misrouted (0 of 24 calls in Config B).
+- **Never take identity from the model.** Without server-side identity injection, models filled the slot with placeholders such as `"user123"`. Login-required tasks rose from **47.5% to 93.0%** (Qwen 3 32B) once the server injected the real identity.
+- **Made-up results need chat history plus a past success.** All 7 fabricated results across the 24 result files happened in the one setup that replayed chat history containing an earlier success. Stateless tool turns produced none.
+- **Grade every tool call, not only the first.** In Config B, the original grader would have ranked the strongest model (Qwen 3 32B, 83.8%) as the least reliable. The corrected grader reads every tool call in the turn and agrees with hand labels on **150 of 151** flagged replies.
+- **Fewer calls, faster replies.** From Config B to C, tool calls per status check fell from 1.44 to 1.00 and average response time from 16.6 s to 12.4 s.
+- **End to end.** Qwen 3 32B completed the full prove → status → download → verify lifecycle in every run of Configs C and D.
+
+The paper also states the limits plainly: an invented job ID still defeats the fallbacks, the nonce is fixed, and hashes and job IDs reach the model provider. See [Deviations and known issues](#deviations-and-known-issues).
+
+## Architecture
+
+```mermaid
+flowchart LR
+    U[User] -->|message| F[Flask backend<br/>auth + chat UI]
+    F --> A[LangGraph ReAct agent]
+    A -->|tool call| I[Interceptor<br/>strips model user_id,<br/>injects session identity]
+    I --> M[FastMCP prover server<br/>8 tools + skeptical checks]
+    M --> RD[(Redis<br/>session and job state)]
+    M --> PG[(Postgres<br/>accounts and hashes)]
+    M --> C[CoSMeTIC provers<br/>KS · LRT · logistic accuracy]
+    M -->|tool result| A
+    A --> F
+    F -->|reply + trust label| U
+    F -.->|sign-in| PG
+    F -.->|session owner| RD
+```
+
+## Five rules for MCP tool design (from the paper)
+
+1. **Override routing values from authoritative state.** If the server already knows the right backend, ignore the model's value, but check that the key it uses (such as a job ID) belongs to the session.
+2. **Strip and inject identity on the server.** A model-supplied identity is only the model's word.
+3. **Keep chat history out of tool-grounded turns.** History with a past success was the only condition under which any model made up a result.
+4. **Make trust labels vouch for outcomes, not calls.** A failed tool call should never earn a "backed" label.
+5. **Scrub tool outputs before the model sees them,** and test the boundary on every model you deploy, because fallback behavior varies a lot between models.
+
+In industry terms, skeptical tools are pre-tool-call guardrails with validate and mutate hooks, placed where MCP gateways put their checks, with the effect measured across three model families.
+
+## System overview
+
 Code and data for the paper *Natural-Language Zero-Knowledge Verification via Skeptical MCP Tools* (see [Paper and artifact map](#paper-and-artifact-map)).
 
 The system, the **MCP Prover Chatbot**, is a dockerized chat assistant that lets authenticated users interact with the **CoSMeTIC** zero-knowledge proof service through natural language. Queries flow through a LangGraph ReAct agent (default model **Qwen3-32B** through an OpenAI-compatible API, swappable via `LLM_MODEL` and `LLM_BASE_URL`; cross-model runs have also used Llama 3 8B and Mistral-Small 24B) which calls MCP tools exposed by a dedicated prover server. Session state lives in Redis; user accounts in Postgres.
@@ -8,6 +88,7 @@ The repository also hosts an **ablation study** — four main configurations (A/
 
 ## Contents
 
+- **Want the results?** → [Results at a glance](#results-at-a-glance) · [What we found](#what-we-found) · [Five rules](#five-rules-for-mcp-tool-design-from-the-paper)
 - **Just want to run it?** → [Quick start](#quick-start) · [Example queries](#example-queries). That's all you need — stop after step 4.
 - **Reproducing the research / ablation study?** → [Ablation configs](#ablation-study--configurations) · [Test suite](#running-the-ablation-test-suite) · [Grading](#grading-results) · [Sweeps](#multi-model--multi-config-sweeps)
 - **Here for the paper's artifacts?** → [Paper and artifact map](#paper-and-artifact-map) · [Reproduce the numbers offline](#reproducing-the-papers-numbers-offline) · [Models and providers](#models-and-providers) · [Deviations and known issues](#deviations-and-known-issues)
@@ -262,9 +343,13 @@ Every figure in the paper's tables and prose that derives from the logs can be r
 
 ```bash
 python eval/reproduce_paper_numbers.py                     # prints every derived figure with its definition
-python eval/reproduce_paper_numbers.py > out.txt && diff out.txt eval/expected_output.txt
+python eval/reproduce_paper_numbers.py > out.txt && diff --strip-trailing-cr out.txt eval/expected_output.txt
 python eval/test_grading_faithfulness_v2.py                # four synthetic controls; hand-label agreement 150 of 151
 ```
+
+On Linux and macOS, `diff` reports one line that differs only by the path separator
+(`reports\wrongport_...` in the saved file, `reports/wrongport_...` in your output); every number matches.
+See [Deviations and known issues](#deviations-and-known-issues).
 
 `eval/expected_output.txt` is the output as saved at release. Figures marked **[H]** in the
 output were established by hand-reading the dumps in `reports/` and are reported, not recomputed.
@@ -310,6 +395,15 @@ Stated plainly, because a reader of the code would otherwise infer the opposite.
   `[[0.0, 0.0, 0.0]]`, so proofs are not tied to individual verification requests. Hashes are
   scrubbed only at display time; tool outputs, including dataset hashes, job identifiers and the
   account UUID, reach the model provider in every configuration.
+- **Checksums of two text files.** The release recorded the SHA-256 of `eval/expected_output.txt`
+  and `results/RESULTS_MANIFEST.csv` from Windows copies (CRLF line endings), so `sha256sum -c`
+  failed for those two files on Linux and macOS. `SHA256SUMS.txt` now lists their checksums as
+  stored in Git (LF), and `.gitattributes` checks both out with LF on every system. The file
+  contents are unchanged.
+- **A Windows path in the saved output.** `eval/expected_output.txt` was produced on Windows, so
+  its line `wrote reports\wrongport_replies_classified.txt` uses a backslash. On Linux and macOS
+  the script prints a forward slash, so a plain `diff` shows that one line. No number differs;
+  the CI check (`.github/workflows/reproduce.yml`) compares with slashes normalized.
 - **Data.** All accounts are synthetic (`User1` to `User54`, seeded at run time from CoSMeTIC's
   synthetic input files); one generated test-account UUID appears in the logs.
   No real participant or patient data exists anywhere in this repository.

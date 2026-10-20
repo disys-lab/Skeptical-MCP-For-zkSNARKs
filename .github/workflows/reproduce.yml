@@ -1,0 +1,35 @@
+name: Reproduce paper numbers
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"   # same as Dockerfile.backend and Dockerfile.prover
+
+      - name: Verify checksums of results, suites, graders and expected output
+        run: sha256sum -c SHA256SUMS.txt
+
+      - name: Recompute every number in the paper and compare with the saved output
+        run: |
+          python eval/reproduce_paper_numbers.py > out.txt
+          # expected_output.txt was saved on Windows, so one line shows a path as
+          # reports\... ; on Linux the script prints reports/... . Compare with slashes
+          # normalized so only real differences fail the check.
+          diff <(tr '\' '/' < out.txt) <(tr '\' '/' < eval/expected_output.txt)
+
+      - name: Grader controls and hand-label agreement
+        run: python eval/test_grading_faithfulness_v2.py
+
+      - name: Chart values match the paper
+        run: |
+          pip install -r docs/requirements-docs.txt
+          python docs/make_charts.py
