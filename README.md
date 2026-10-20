@@ -98,7 +98,8 @@ The repository also hosts an **ablation study** — four main configurations (A/
 
 This repository is the artifact for *Natural-Language Zero-Knowledge Verification via Skeptical
 MCP Tools* (Shanto and Ramanan, Oklahoma State University, 2026). Citation metadata is in
-`CITATION.cff`. The manuscript is in `manuscript/`. Code is MIT-licensed (`LICENSE`); the evaluation data is CC BY 4.0 (`LICENSE-DATA`).
+`CITATION.cff`. The manuscript is in `manuscript/`. The code exactly as released with the paper is
+tagged [`paper-v1`](https://github.com/disys-lab/Skeptical-MCP-For-zkSNARKs/tree/paper-v1). Code is MIT-licensed (`LICENSE`); the evaluation data is CC BY 4.0 (`LICENSE-DATA`).
 
 | The paper promises | Where it is |
 |---|---|
@@ -404,6 +405,12 @@ Stated plainly, because a reader of the code would otherwise infer the opposite.
   its line `wrote reports\wrongport_replies_classified.txt` uses a backslash. On Linux and macOS
   the script prints a forward slash, so a plain `diff` shows that one line. No number differs;
   the CI check (`.github/workflows/reproduce.yml`) compares with slashes normalized.
+- **Post-release runtime fixes (after tag `paper-v1`).** A fresh build of the released code no longer
+  ran: DeepInfra began treating a missing `max_tokens` as a request for the whole context window,
+  and newer `langchain-openai` releases reuse one pooled connection across requests, which fails
+  with "Event loop is closed" because each request runs on its own event loop. `app.py` now sets
+  `max_tokens=16384` and an HTTP client without keep-alive, and `requirements.txt` pins the tested
+  package versions. The skeptical-tools logic, the tools and the evaluation are unchanged.
 - **Data.** All accounts are synthetic (`User1` to `User54`, seeded at run time from CoSMeTIC's
   synthetic input files); one generated test-account UUID appears in the logs.
   No real participant or patient data exists anywhere in this repository.
