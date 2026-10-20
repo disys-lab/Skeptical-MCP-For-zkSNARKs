@@ -353,6 +353,13 @@ def initialize_agent():
             api_key=deepinfra_api_key,
             base_url=llm_base_url,
             temperature=0.0,
+            # DeepInfra now asks for the whole 40,960-token window as output when max_tokens
+            # is not set, which rejects every request. 16,384 leaves room for the prompt.
+            max_tokens=16384,
+            # Each /get request runs on its own event loop and closes it. Newer langchain-openai
+            # reuses one pooled HTTP connection across requests, which then fails with
+            # "Event loop is closed". Do not keep idle connections between requests.
+            http_async_client=httpx.AsyncClient(timeout=600, limits=httpx.Limits(max_keepalive_connections=0)),
         )
         # Smaller models (e.g., Llama 3 8B) need an explicit system prompt to
         # engage tool calling when many tools are available. Qwen 3 32B figures
