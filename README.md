@@ -346,6 +346,10 @@ python eval/reproduce_paper_numbers.py > out.txt && diff --strip-trailing-cr out
 python eval/test_grading_faithfulness_v2.py                # four synthetic controls; hand-label agreement 150 of 151
 ```
 
+On Linux and macOS, `diff` reports one line that differs only by the path separator
+(`reports\wrongport_...` in the saved file, `reports/wrongport_...` in your output); every number matches.
+See [Deviations and known issues](#deviations-and-known-issues).
+
 `eval/expected_output.txt` is the output as saved at release. Figures marked **[H]** in the
 output were established by hand-reading the dumps in `reports/` and are reported, not recomputed.
 Only the standard library and the two graders in `eval/` are needed.
@@ -395,6 +399,10 @@ Stated plainly, because a reader of the code would otherwise infer the opposite.
   failed for those two files on Linux and macOS. `SHA256SUMS.txt` now lists their checksums as
   stored in Git (LF), and `.gitattributes` checks both out with LF on every system. The file
   contents are unchanged.
+- **A Windows path in the saved output.** `eval/expected_output.txt` was produced on Windows, so
+  its line `wrote reports\wrongport_replies_classified.txt` uses a backslash. On Linux and macOS
+  the script prints a forward slash, so a plain `diff` shows that one line. No number differs;
+  the CI check (`.github/workflows/reproduce.yml`) compares with slashes normalized.
 - **Data.** All accounts are synthetic (`User1` to `User54`, seeded at run time from CoSMeTIC's
   synthetic input files); one generated test-account UUID appears in the logs.
   No real participant or patient data exists anywhere in this repository.
