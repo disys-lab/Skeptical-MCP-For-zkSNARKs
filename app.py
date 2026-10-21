@@ -245,18 +245,19 @@ def _current_user():
     user_id = session.get("user_id")
     if not user_id:
         return None
-    username = session.get("username")
-    if username:
-        return {"id": user_id, "username": username}
-    email = session.get("user_email")
-    if email:
-        return {"id": user_id, "email": email}
-    db_user = get_user_by_id(user_id)
-    if db_user:
-        if db_user.get("username"):
-            session["username"] = db_user["username"]
-        if db_user.get("email"):
-            session["user_email"] = db_user["email"]
+    # Check that the account in the login cookie still exists. Without this, a cookie from
+    # before a database reset showed the user as signed in with a dead account ("no hash saved").
+    try:
+        db_user = get_user_by_id(user_id)
+    except Exception:
+        # Database unavailable: keep the session instead of logging the user out.
+        username = session.get("username")
+        return {"id": user_id, "username": username} if username else None
+    if not db_user:
+        session.clear()
+        return None
+    if db_user.get("username"):
+        session["username"] = db_user["username"]
     return db_user
 
 
