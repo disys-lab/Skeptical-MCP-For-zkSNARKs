@@ -17,7 +17,7 @@ An LLM is good at understanding what a user wants. It is not reliable at supplyi
 
 | Move | What the tool does | Example in this repo |
 |---|---|---|
-| **Validate** | Reject a bad value with a clear error | `verify_proof` returns "proof type is required" instead of guessing a prover |
+| **Validate** | Reject a bad value with a clear error | `verify_proof` returns "proof type is required" instead of guessing a prover (Configs A and B; in C and D it first uses the stored type and probes the provers, then falls back to logistic accuracy) |
 | **Complete** | Fill a missing value from stored state | `check_status` takes the proof type from the stored job when the model leaves it out |
 | **Override** | Replace the model's value with the server's | The interceptor strips any model-supplied `user_id` and injects the real session identity |
 
