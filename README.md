@@ -441,6 +441,11 @@ Stated plainly, because a reader of the code would otherwise infer the opposite.
   with "Event loop is closed" because each request runs on its own event loop. `app.py` now sets
   `max_tokens=16384` and an HTTP client without keep-alive, and `requirements.txt` pins the tested
   package versions. The skeptical-tools logic, the tools and the evaluation are unchanged.
+- **Post-release web UI (after tag `paper-v1`).** `templates/index.html` was redesigned: trust labels
+  appear as badges, a read-only job tracker shows the session's jobs from `/context/<session_id>`, and
+  replies are HTML-escaped. The evaluation never used the web page (the runner calls `/get` directly),
+  so no result depends on it. The tracker's "Verified" step comes from `verify_proof` results seen in
+  the current page, because the server does not store verification.
 - **Data.** All accounts are synthetic (`User1` to `User54`, seeded at run time from CoSMeTIC's
   synthetic input files); one generated test-account UUID appears in the logs.
   No real participant or patient data exists anywhere in this repository.
