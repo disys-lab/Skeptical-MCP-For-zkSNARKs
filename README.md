@@ -446,6 +446,11 @@ Stated plainly, because a reader of the code would otherwise infer the opposite.
   replies are HTML-escaped. The evaluation never used the web page (the runner calls `/get` directly),
   so no result depends on it. The tracker's "Verified" step comes from `verify_proof` results seen in
   the current page, because the server does not store verification.
+- **Two more post-release fixes (after tag `paper-v1`).** `check_hash_existence` now writes a line for
+  every prover that finds the hash; before, a KS match in only one of `s1` and `s2` was left out of
+  the per-prover lines (the summary line was always right), and this also applied to the logged
+  replies. `app.py` now checks that the account in the login cookie still exists, so a cookie from
+  before a database reset shows the sign-in form instead of a signed-in user with no hash.
 - **Data.** All accounts are synthetic (`User1` to `User54`, seeded at run time from CoSMeTIC's
   synthetic input files); one generated test-account UUID appears in the logs.
   No real participant or patient data exists anywhere in this repository.
