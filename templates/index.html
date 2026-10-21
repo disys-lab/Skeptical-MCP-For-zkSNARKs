@@ -1,866 +1,507 @@
 <!DOCTYPE html>
-<html>
-	<head>
-		<title>MCP Chatbot</title>
-		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-		<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js" integrity="sha384-pjaaA8dDz/5BgdFUPX6M/9SUZv4d12SUPF0axWc+VRZkx5xU3daN+lYb49+Ax+Tl" crossorigin="anonymous"></script>
-		<style>
-			body, html {
-				height: 100%;
-				margin: 0;
-				padding: 0;
-			}
-			
-			.chat {
-				height: 100vh;
-				padding: 20px 0;
-			}
-			
-			.card {
-				height: 100%;
-				border-radius: 15px;
-				box-shadow: 0 0 20px rgba(0,0,0,0.1);
-			}
-			
-			.card-header {
-				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-				color: white;
-				border-radius: 15px 15px 0 0 !important;
-				padding: 20px;
-			}
-			
-			.msg_head {
-				border-bottom: none;
-			}
-			
-			.img_cont {
-				position: relative;
-				height: 40px;
-				width: 40px;
-			}
-			
-			.user_img {
-				height: 40px;
-				width: 40px;
-				border: 2px solid #fff;
-			}
-			
-			.online_icon {
-				position: absolute;
-				height: 15px;
-				width: 15px;
-				background-color: #4cd137;
-				border-radius: 50%;
-				bottom: 0.2em;
-				right: 0.4em;
-				border: 1.5px solid white;
-			}
-			
-			.user_info {
-				margin-top: auto;
-				margin-bottom: auto;
-				margin-left: 15px;
-			}
-			
-			.user_info span {
-				font-size: 20px;
-				font-weight: 600;
-			}
-			
-			.user_info p {
-				font-size: 13px;
-				color: rgba(255,255,255,0.8);
-				margin: 0;
-			}
-			
-			.msg_card_body {
-				overflow-y: auto;
-				padding: 20px;
-				background-color: #f8f9fa;
-			}
-			
-			.msg_container {
-				display: flex;
-				align-items: flex-end;
-				margin-bottom: 20px;
-			}
-			
-			.msg_container_send {
-				display: flex;
-				align-items: flex-end;
-				justify-content: flex-end;
-				margin-bottom: 20px;
-			}
-			
-			.msg_cotainer {
-				background: white;
-				padding: 15px;
-				border-radius: 15px;
-				box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-				max-width: 70%;
-				position: relative;
-			}
-			
-			.msg_cotainer_send {
-				background: #667eea;
-				color: white;
-				padding: 15px;
-				border-radius: 15px;
-				box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-				max-width: 70%;
-				position: relative;
-			}
-			
-			.msg_time {
-				font-size: 11px;
-				color: #999;
-				margin-top: 5px;
-				display: block;
-			}
-			
-			.msg_time_send {
-				font-size: 11px;
-				color: rgba(255,255,255,0.8);
-				margin-top: 5px;
-				display: block;
-			}
-			
-			.img_cont_msg {
-				height: 40px;
-				width: 40px;
-				margin: 0 10px;
-			}
-			
-			.user_img_msg {
-				height: 40px;
-				width: 40px;
-				border: 2px solid #fff;
-			}
-			
-			.card-footer {
-				background: white;
-				border-top: none;
-				padding: 20px;
-				border-radius: 0 0 15px 15px;
-			}
-			
-			.input-group {
-				border-radius: 25px;
-				overflow: hidden;
-				box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-			}
-			
-			.type_msg {
-				border: none;
-				padding: 15px 20px;
-				font-size: 14px;
-			}
-			
-			.type_msg:focus {
-				box-shadow: none;
-				outline: none;
-			}
-			
-			.send_btn {
-				background: #667eea;
-				border: none;
-				padding: 15px 20px;
-				color: white;
-				cursor: pointer;
-				transition: all 0.3s ease;
-			}
-			
-			.send_btn:hover {
-				background: #5a6fd8;
-				transform: translateY(-2px);
-			}
-			
-			.send_btn:focus {
-				box-shadow: none;
-				outline: none;
-			}
-			
-			.loading-spinner {
-				display: inline-block;
-				width: 16px;
-				height: 16px;
-				border: 2px solid #f3f3f3;
-				border-top: 2px solid #667eea;
-				border-radius: 50%;
-				animation: spin 1s linear infinite;
-				margin-left: 10px;
-			}
-			
-			@keyframes spin {
-				0% { transform: rotate(0deg); }
-				100% { transform: rotate(360deg); }
-			}
-			
-			.download-btn {
-				display: inline-block;
-				margin-top: 10px;
-				padding: 8px 16px;
-				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-				color: white;
-				border: none;
-				border-radius: 20px;
-				cursor: pointer;
-				font-size: 14px;
-				transition: all 0.3s ease;
-				box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-			}
-			
-			.download-btn:hover {
-				transform: translateY(-2px);
-				box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-				background: linear-gradient(135deg, #5a6fd8 0%, #6a3f8f 100%);
-			}
-			
-			.download-btn:active {
-				transform: translateY(0);
-			}
-			
-			.download-btn i {
-				margin-right: 5px;
-			}
-			
-			.download-container {
-				margin-top: 10px;
-				padding-top: 10px;
-				border-top: 1px solid rgba(0,0,0,0.1);
-			}
-			
-			/* Tab Styles */
-			.nav-tabs {
-				border-bottom: 2px solid #667eea;
-				background: white;
-				padding: 0 20px;
-			}
-			
-			.nav-tabs .nav-item {
-				margin-bottom: -2px;
-			}
-			
-			.nav-tabs .nav-link {
-				border: none;
-				border-bottom: 3px solid transparent;
-				color: #666;
-				padding: 15px 25px;
-				font-weight: 500;
-				transition: all 0.3s ease;
-			}
-			
-			.nav-tabs .nav-link:hover {
-				border-bottom-color: #667eea;
-				color: #667eea;
-			}
-			
-			.nav-tabs .nav-link.active {
-				color: #667eea;
-				border-bottom-color: #667eea;
-				background: transparent;
-			}
-			
-			.tab-content {
-				height: calc(100vh - 200px);
-				overflow: hidden;
-				display: flex;
-				flex-direction: column;
-			}
-			
-			.tab-pane {
-				height: 100%;
-				display: none;
-				flex: 1;
-				overflow: hidden;
-			}
-			
-			.tab-pane.active,
-			.tab-pane.show {
-				display: flex;
-				flex-direction: column;
-			}
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prover Assistant</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22%3E%3Crect width=%2224%22 height=%2224%22 rx=%225%22 fill=%22%231f3b57%22/%3E%3Cpath d=%22M12 4l6 2.6v4.3c0 3.9-2.6 7.2-6 8.7-3.4-1.5-6-4.8-6-8.7V6.6L12 4z%22 fill=%22none%22 stroke=%22white%22 stroke-width=%221.8%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: header, then chat (left) and a read-only job tracker (right). Light theme only. */
+:root {
+  --bg: #ffffff; --surface: #ffffff; --surface-2: #f6f8f9; --ink: #132132; --ink-2: #4b5b6b; --ink-3: #8696a3; --line: #e1e7ea;
+  --head: #ffffff; --accent: #0d7a7e; --accent-ink: #ffffff; --accent-soft: #e3f2f2; --navy: #1f3b57;
+  --user: #f0f3f5; --user-ink: #132132;
+  --ok: #1b7343; --ok-bg: #e2f3e9; --info: #22529e; --info-bg: #e4ecf8; --plain: #4b5b6b; --plain-bg: #eef1f3;
+  --warn: #85560a; --warn-bg: #faefd8; --bad: #a3261d; --bad-bg: #fbe7e5;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5; }
+button, input { font: inherit; }
+.app { height: 100%; display: flex; flex-direction: column; }
 
-			.auth-panel {
-				margin-top: 15px;
-				padding: 12px;
-				background: rgba(255, 255, 255, 0.12);
-				border-radius: 10px;
-			}
+/* Header */
+.head { border-bottom: 1px solid var(--line); padding: 12px 18px; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: space-between; }
+.brand { display: flex; gap: 12px; align-items: center; }
+.mark { width: 40px; height: 40px; border-radius: 10px; background: var(--navy); color: #fff; display: grid; place-items: center; flex: none; }
+.brand h1 { font-size: 17px; font-weight: 600; margin: 0; }
+.brand p { margin: 0; font-size: 12.5px; color: var(--ink-2); }
+.account { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.who { display: flex; flex-direction: column; line-height: 1.25; font-size: 13px; text-align: right; }
+.who span { font-weight: 600; }
+.who code { font-family: var(--font-data); font-size: 11.5px; color: var(--ink-2); }
+.signin { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.signin input { width: 130px; padding: 6px 9px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface-2); color: var(--ink); }
+.btn { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn-primary { background: var(--navy); color: #fff; border-color: var(--navy); font-weight: 600; }
+.btn-primary:hover { color: #fff; opacity: .92; }
+.auth-status { font-size: 12px; color: var(--ink-2); min-height: 1em; }
+.auth-status.error { color: var(--bad); }
+#trackerToggle { display: none; }
 
-			.auth-inline {
-				display: flex;
-				gap: 8px;
-				flex-wrap: wrap;
-				align-items: center;
-			}
+.body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 330px; }
 
-			.auth-inline input {
-				max-width: 220px;
-			}
+/* Chat */
+.chat { min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+.log { flex: 1; min-height: 0; overflow-y: auto; padding: 22px 18px; display: flex; flex-direction: column; gap: 16px; }
+.row { display: flex; gap: 10px; align-items: flex-end; }
+.row.me { justify-content: flex-end; }
+.avatar { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
+.bubble { min-width: 0; max-width: min(78%, 600px); background: var(--surface); border: 1px solid var(--line); border-radius: 12px 12px 12px 4px; padding: 11px 14px; overflow-wrap: anywhere; }
+.me .bubble { background: var(--user); color: var(--user-ink); border-color: var(--line); border-radius: 12px 12px 4px 12px; }
+.bubble.error { border-color: var(--bad); background: var(--bad-bg); }
+.bubble ul { margin: 6px 0; padding-left: 20px; }
+.bubble code { font-family: var(--font-data); font-size: 13px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-top: 10px; }
+.time { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.me .time { display: block; text-align: right; margin-top: 4px; }
+.save { margin-top: 10px; }
 
-			.auth-note {
-				font-size: 12px;
-				color: rgba(255, 255, 255, 0.9);
-				margin-top: 8px;
-			}
+.trust { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; letter-spacing: .02em; border-radius: 6px; padding: 3px 8px 3px 6px; }
+.trust svg { flex: none; }
+.t-verified { color: var(--ok); background: var(--ok-bg); }
+.t-provable { color: var(--info); background: var(--info-bg); }
+.t-backed { color: var(--plain); background: var(--plain-bg); }
+.t-unbacked { color: var(--warn); background: var(--warn-bg); }
 
-			.auth-status {
-				font-size: 13px;
-				color: #fff;
-				margin-top: 8px;
-				word-break: break-word;
-			}
-			
-		</style>
-	</head>
-	
-	<body>
-		<div class="container-fluid h-100">
-			<div class="row justify-content-center h-100">		
-				<div class="col-md-10 col-xl-8 chat">
-					<div class="card">
-						<div class="card-header msg_head">
-							<div class="d-flex bd-highlight">
-								<div class="img_cont">
-									<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img">
-									<span class="online_icon"></span>
-								</div>
-								<div class="user_info">
-									<span>MCP Prover Assistant</span>
-									<p>I can help you check proof existence and submit proofs!</p>
-								</div>
-							</div>
-							<div class="auth-panel">
-								<form id="signinForm" class="auth-inline">
-									<input type="text" id="signinUsername" class="form-control form-control-sm" placeholder="Username" required />
-									<input type="password" id="signinPassword" class="form-control form-control-sm" placeholder="Password" required />
-									<button type="submit" class="btn btn-light btn-sm">Sign In</button>
-								</form>
-								<div class="auth-note">
-									Sign in with dataset credentials (e.g. User1, User2). Run admin sync to load users from input-files zip.
-								</div>
-								<div id="signedInPanel" style="display:none;">
-									<div class="auth-inline" style="margin-top:10px;">
-										<span id="signedInLabel" class="badge badge-light"></span>
-										<button type="button" id="logoutBtn" class="btn btn-outline-light btn-sm">Logout</button>
-									</div>
-									<div id="maskedHashText" class="auth-note"></div>
-								</div>
-								<div id="authStatus" class="auth-status"></div>
-							</div>
-						</div>
-						
-						<!-- Tabs Navigation -->
-						<ul class="nav nav-tabs" role="tablist">
-							<li class="nav-item">
-								<a class="nav-link active" id="chat-tab" data-toggle="tab" href="#chat" role="tab" aria-controls="chat" aria-selected="true">
-									<i class="fas fa-comments"></i> Chat
-								</a>
-							</li>
-						</ul>
-						
-						<!-- Tab Content -->
-						<div class="tab-content">
-							<!-- Chat Tab -->
-							<div class="tab-pane fade show active" id="chat" role="tabpanel" aria-labelledby="chat-tab">
-								<div id="messageFormeight" class="card-body msg_card_body" style="overflow-y: auto; flex: 1;">
-									<!-- Welcome message -->
-									<div class="d-flex justify-content-start mb-4">
-										<div class="img_cont_msg">
-											<img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg">
-										</div>
-										<div class="msg_cotainer">
-											Hello! I'm your MCP-powered Prover Assistant. I can help you check if proofs exist and submit proof jobs. What would you like to do?
-											<span class="msg_time">Just now</span>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-						
-						<!-- Footer (only show for chat tab) -->
-						<div class="card-footer" id="chatFooter">
-							<form id="messageArea" class="input-group">
-                                <input type="text" id="text" name="msg" placeholder="Type your message..." autocomplete="off" class="form-control type_msg" required/>
-								<div class="input-group-append">
-									<button type="submit" id="send" class="input-group-text send_btn"><i class="fas fa-location-arrow"></i></button>
-								</div>
-							</form>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		
-		<script>
-			// Generate session ID
-			var sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substring(2, 11);
-			var authUser = null;
+.typing { display: inline-flex; gap: 4px; padding: 4px 0; }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); animation: blink 1.2s infinite; }
+.typing i:nth-child(2) { animation-delay: .2s; } .typing i:nth-child(3) { animation-delay: .4s; }
+@keyframes blink { 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .typing i { animation: none; } }
 
-			function setAuthStatus(message, isError) {
-				var el = $('#authStatus');
-				el.text(message || '');
-				el.css('color', isError ? '#ffd6d6' : '#eaffea');
-			}
+.composer { border-top: 1px solid var(--line); padding: 12px 14px 14px; }
+.composer form { display: flex; gap: 8px; }
+#msg { flex: 1; min-width: 0; color: var(--ink); background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+#msg:focus, .signin input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.send { font-weight: 600; color: #fff; background: var(--navy); border: 0; border-radius: 10px; padding: 0 18px; cursor: pointer; }
+.send:disabled { opacity: .6; cursor: wait; }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-			function renderAuthState() {
-				if (authUser) {
-					$('#signinForm').hide();
-					$('#signedInPanel').show();
-					$('#signedInLabel').text(authUser.username || authUser.email || '');
-				} else {
-					$('#signinForm').show();
-					$('#signedInPanel').hide();
-					$('#signedInLabel').text('');
-					$('#maskedHashText').text('');
-				}
-			}
+/* Job tracker */
+.panel { border-left: 1px solid var(--line); background: var(--surface-2); min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.panel h2 { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; color: var(--ink-2); margin: 0; }
+.panel-sub { margin: 4px 0 0; font-size: 12.5px; color: var(--ink-2); }
+.jobs { display: flex; flex-direction: column; gap: 10px; }
+.empty { font-size: 13px; color: var(--ink-2); border: 1px dashed var(--line); border-radius: 10px; padding: 14px; background: var(--surface); }
+.job { border: 1px solid var(--line); border-radius: 12px; padding: 12px 13px; display: flex; flex-direction: column; gap: 10px; background: var(--surface); }
+.job-type { font-weight: 600; }
+.job-type small { font-weight: 400; color: var(--ink-2); font-size: 12px; margin-left: 4px; }
+.id-row { display: flex; align-items: center; gap: 6px; }
+.job-id { font-family: var(--font-data); font-size: 12px; color: var(--ink-2); }
+.copy { font-size: 11.5px; color: var(--ink-2); background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 1px 7px; cursor: pointer; }
+.track { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); }
+.track li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-3); text-align: center; }
+.track li::before { content: ""; position: absolute; top: 9px; right: 50%; width: 100%; height: 2px; background: var(--line); }
+.track li:first-child::before { display: none; }
+.track .node { position: relative; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center; color: #fff; }
+.track li.on { color: var(--ink); }
+.track li.on::before, .track li.on .node { background: var(--navy); border-color: var(--navy); }
+.track li.now { color: var(--info); font-weight: 600; }
+.track li.now .node { border-color: var(--info); }
+.track li.now .node::after { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--info); }
+.track li.verified { color: var(--ok); font-weight: 600; }
+.track li.verified::before, .track li.verified .node { background: var(--ok); border-color: var(--ok); }
+.track li.bad { color: var(--bad); font-weight: 600; }
+.track li.bad .node { border-color: var(--bad); background: var(--bad-bg); }
+.asof { font-size: 12px; color: var(--ink-2); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.labels { border-top: 1px solid var(--line); padding-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+.labels dl { margin: 0; display: flex; flex-direction: column; gap: 10px; }
+.labels dl div { display: flex; flex-direction: column; gap: 4px; }
+.labels dd { margin: 0; font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
 
-			function refreshAuthState() {
-				$.ajax({
-					url: '/auth/me',
-					type: 'GET'
-				}).done(function(data) {
-					try {
-						var result = typeof data === 'string' ? JSON.parse(data) : data;
-						authUser = result.logged_in ? result.user : null;
-						renderAuthState();
-						if (authUser) {
-							loadMyHash();
-						}
-					} catch (e) {
-						authUser = null;
-						renderAuthState();
-					}
-				}).fail(function() {
-					authUser = null;
-					renderAuthState();
-				});
-			}
+@media (max-width: 820px) {
+  .body { display: flex; flex-direction: column; }
+  .chat { flex: 1; }
+  #trackerToggle { display: inline-block; }
+  .panel { border-left: 0; border-bottom: 1px solid var(--line); max-height: 50vh; order: -1; }
+  .body:not(.panel-open) .panel { display: none; }
+  .bubble { max-width: 88%; }
+  .avatar { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="head">
+    <div class="brand">
+      <div class="mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M8.8 12.2l2.2 2.2 4.4-4.6"/></svg></div>
+      <div><h1>Prover Assistant</h1><p>Zero-knowledge proofs for CoSMeTIC clinical studies</p></div>
+    </div>
+    <div class="account">
+      <button class="btn" id="trackerToggle" type="button" aria-controls="panel" aria-expanded="false">Job tracker</button>
+      <form class="signin" id="signinForm">
+        <label for="signinUsername" hidden>Username</label>
+        <input id="signinUsername" type="text" placeholder="Username (e.g. User1)" autocomplete="username" required>
+        <label for="signinPassword" hidden>Password</label>
+        <input id="signinPassword" type="password" placeholder="Password" autocomplete="current-password" required>
+        <button class="btn btn-primary" type="submit">Sign in</button>
+      </form>
+      <div id="signedIn" hidden>
+        <div class="account">
+          <div class="who"><span id="whoName"></span><code id="whoHash"></code></div>
+          <button class="btn" id="logoutBtn" type="button">Log out</button>
+        </div>
+      </div>
+      <div class="auth-status" id="authStatus" role="status"></div>
+    </div>
+  </header>
 
-			function loadMyHash() {
-				$.ajax({
-					url: '/api/me/hash',
-					type: 'GET'
-				}).done(function(data) {
-					try {
-						var result = typeof data === 'string' ? JSON.parse(data) : data;
-						if (result.masked_hash) {
-							$('#maskedHashText').text('Saved hash: ' + result.masked_hash);
-						} else {
-							$('#maskedHashText').text('No hash saved yet.');
-						}
-					} catch (e) {
-						$('#maskedHashText').text('');
-					}
-				}).fail(function() {
-					$('#maskedHashText').text('');
-				});
-			}
-			
-			function formatTime(date) {
-				const hour = date.getHours();
-				const minute = date.getMinutes();
-				return hour + ":" + (minute < 10 ? "0" + minute : minute);
-			}
-			
-			function extractJobId(text) {
-				// Try to extract job ID from messages like "job ID 1762747067361" or "1762747067361"
-				// Pattern 1: "job ID: 123" or "jobid: 123" or "job ID is 123"
-				var jobIdMatch = text.match(/(?:job\s+id|jobid)[\s:]*is?[\s:]*(\d+)/i) || 
-				                 text.match(/(?:job\s+id|jobid)[\s:]*(\d+)/i);
-				// Pattern 2: Any 13+ digit number (job IDs are timestamps)
-				if (!jobIdMatch) {
-					jobIdMatch = text.match(/\b(\d{13,})\b/);
-				}
-				return jobIdMatch ? jobIdMatch[1] : null;
-			}
-			
-			function isExplicitDownloadRequest(msg) {
-				// Check if user explicitly asked to download (not just job submission)
-				// Look for explicit download commands
-				var explicitDownloadPatterns = /download\s+(it|the|proof|file)|get\s+(the\s+)?proof|fetch\s+(the\s+)?proof|retrieve\s+(the\s+)?proof/i;
-				return explicitDownloadPatterns.test(msg);
-			}
-			
-			function isJobCompleted(msg) {
-				// Check if message indicates job is completed/done
-				// Look for status indicators in the chatbot response
-				var statusPatterns = /"status"\s*:\s*"done"|status.*done|completed|finished|ready\s+to\s+download|proof.*ready|job.*completed/i;
-				// Also check if message says file was downloaded (means job is done)
-				var downloadSuccess = /downloaded\s+successfully|file\s+has\s+been\s+downloaded|proof\s+file.*downloaded/i.test(msg);
-				return statusPatterns.test(msg) || downloadSuccess;
-			}
-			
-			function downloadProofFile(jobId, buttonElement) {
-				// Disable button and show loading
-				var originalHtml = $(buttonElement).html();
-				$(buttonElement).prop('disabled', true);
-				$(buttonElement).html('<i class="fas fa-spinner fa-spin"></i> Downloading...');
-				
-				// Use AJAX to download and trigger browser download
-				$.ajax({
-					url: '/download_proof',
-					type: 'POST',
-					data: { 
-						job_id: jobId,
-						session_id: sessionId
-					},
-					timeout: 120000, // 2 minutes timeout
-					xhrFields: {
-						responseType: 'blob'
-					},
-					success: function(blob, status, xhr) {
-						console.log('Download success callback triggered');
-						console.log('Blob type:', typeof blob, 'is Blob:', blob instanceof Blob);
-						console.log('Blob size:', blob instanceof Blob ? blob.size : 'N/A');
-						
-						// Check content type - if it's JSON, it's an error
-						var contentType = xhr.getResponseHeader('Content-Type') || '';
-						console.log('Content-Type:', contentType);
-						if (contentType.includes('application/json') || contentType.includes('text/json')) {
-							// Response is JSON error, not a file
-							var reader = new FileReader();
-							reader.onload = function() {
-								var errorMsg = 'Download failed';
-								try {
-									var errorData = JSON.parse(reader.result);
-									if (errorData.error) {
-										errorMsg = errorData.error;
-									}
-								} catch (e) {
-									errorMsg = reader.result.substring(0, 100);
-								}
-								alert('Download failed: ' + errorMsg);
-								$(buttonElement).html('<i class="fas fa-exclamation-triangle"></i> Error');
-								$(buttonElement).css('background', '#e74c3c');
-								setTimeout(function() {
-									$(buttonElement).html(originalHtml);
-									$(buttonElement).prop('disabled', false);
-									$(buttonElement).css('background', '');
-								}, 2000);
-							};
-							reader.readAsText(blob);
-							return;
-						}
-						
-						// Check if response is actually a blob (file) or an error message
-						if (blob instanceof Blob && blob.size > 0) {
-							console.log('Valid blob detected, size:', blob.size);
-							// Get filename from Content-Disposition header if available
-							var filename = 'proofs-' + jobId + '.zip';
-							var contentDisposition = xhr.getResponseHeader('Content-Disposition');
-							console.log('Content-Disposition:', contentDisposition);
-							if (contentDisposition) {
-								var filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-								if (filenameMatch && filenameMatch[1]) {
-									filename = filenameMatch[1].replace(/['"]/g, '');
-								}
-							}
-							
-							console.log('Downloading file:', filename);
-							// Create download link
-							var url = window.URL.createObjectURL(blob);
-							var a = document.createElement('a');
-							a.href = url;
-							a.download = filename;
-							a.style.display = 'none';
-							document.body.appendChild(a);
-							a.click();
-							setTimeout(function() {
-								window.URL.revokeObjectURL(url);
-								document.body.removeChild(a);
-							}, 100);
-							
-							// Update button to show success
-							$(buttonElement).html('<i class="fas fa-check"></i> Downloaded!');
-							$(buttonElement).css('background', '#4cd137');
-						} else {
-							// Response might be an error message
-							var reader = new FileReader();
-							reader.onload = function() {
-								var errorMsg = 'Download failed: Invalid file received';
-								try {
-									var errorData = JSON.parse(reader.result);
-									if (errorData.error) {
-										errorMsg = 'Download failed: ' + errorData.error;
-									}
-								} catch (e) {
-									errorMsg = 'Download failed: ' + reader.result.substring(0, 100);
-								}
-								alert(errorMsg);
-								$(buttonElement).html('<i class="fas fa-exclamation-triangle"></i> Error');
-								$(buttonElement).css('background', '#e74c3c');
-							};
-							reader.readAsText(blob);
-						}
-						
-						setTimeout(function() {
-							$(buttonElement).html(originalHtml);
-							$(buttonElement).prop('disabled', false);
-							$(buttonElement).css('background', '');
-						}, 2000);
-					},
-					error: function(xhr, status, error) {
-						// Show error
-						$(buttonElement).html('<i class="fas fa-exclamation-triangle"></i> Error');
-						$(buttonElement).css('background', '#e74c3c');
-						
-						// Try to parse error message
-						var errorMsg = 'Download failed';
-						if (status === 'timeout') {
-							errorMsg = 'Download timed out after 2 minutes. The file may be too large or the server is slow.';
-						} else if (xhr.responseText) {
-							try {
-								var errorData = JSON.parse(xhr.responseText);
-								if (errorData.error) {
-									errorMsg = errorData.error;
-								}
-							} catch (e) {
-								// If response is a blob (file), try to read it as text
-								if (xhr.response instanceof Blob) {
-									var reader = new FileReader();
-									reader.onload = function() {
-										try {
-											var errorData = JSON.parse(reader.result);
-											if (errorData.error) {
-												errorMsg = errorData.error;
-											}
-										} catch (e2) {
-											errorMsg = reader.result.substring(0, 100);
-										}
-										alert('Download failed: ' + errorMsg);
-									};
-									reader.readAsText(xhr.response);
-									return;
-								} else {
-									errorMsg = xhr.responseText.substring(0, 50);
-								}
-							}
-						} else if (error) {
-							errorMsg = error;
-						}
-						
-						alert('Download failed: ' + errorMsg);
-						
-						setTimeout(function() {
-							$(buttonElement).html(originalHtml);
-							$(buttonElement).prop('disabled', false);
-							$(buttonElement).css('background', '');
-						}, 2000);
-					}
-				});
-			}
-			
-			function addBotMessage(msg) {
-				const date = new Date();
-				const str_time = formatTime(date);
-				var msgId = 'msg-' + Date.now();
-				
-				// Try to extract job ID from the message
-				var jobId = extractJobId(msg);
-				
-				// Only show download button if:
-				// 1. User explicitly asked to download (check previous user message)
-				// 2. Job ID is found in the message
-				var showDownloadButton = false;
-				
-				if (jobId) {
-					// Check if user explicitly asked to download
-					var userAskedToDownload = isExplicitDownloadRequest(lastUserMessageText) || 
-					                           /download\s+(it|the|proof|file|job)|get\s+(the\s+)?proof|fetch\s+(the\s+)?proof/i.test(lastUserMessageText);
-					
-					// Show button if user asked to download and we have a job ID
-					// Make it lenient - if user asked to download, show button regardless of bot's response
-					// The backend will handle errors if the job isn't ready
-					// This ensures the button shows even if LLM rephrases the response
-					showDownloadButton = userAskedToDownload;
-				}
-				
-				var botHtml = '<div class="d-flex justify-content-start mb-4" id="' + msgId + '"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer">' + msg.replace(/\n/g, '<br>');
-				
-				// Add download button only if conditions are met
-				if (showDownloadButton && jobId) {
-					botHtml += '<div class="download-container"><button class="download-btn" onclick="downloadProofFile(\'' + jobId + '\', this)"><i class="fas fa-download"></i> Download Now</button></div>';
-				}
-				
-				botHtml += '<span class="msg_time">' + str_time + '</span></div></div>';
-				$("#messageFormeight").append($.parseHTML(botHtml));
-				$("#messageFormeight").scrollTop($("#messageFormeight")[0].scrollHeight);
-			}
-			
-			// Store last user message for download detection
-			var lastUserMessageText = '';
-			
-			// Tab switching - show/hide footer when tab changes
-			$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-				var targetId = $(e.target).attr('id') || $(e.target).attr('href');
-				
-				// Show footer only for chat tab
-				if (targetId === 'chat-tab' || targetId === '#chat') {
-					$('#chatFooter').show();
-				} else {
-					$('#chatFooter').hide();
-				}
-			});
-			$(document).ready(function() {
-				refreshAuthState();
+  <div class="body" id="body">
+    <section class="chat">
+      <div class="log" id="log" aria-live="polite"></div>
+      <div class="composer">
+        <form id="chatForm">
+          <label for="msg" hidden>Message</label>
+          <input id="msg" type="text" placeholder="Ask in plain English, e.g. “Was my data used in any study?”" autocomplete="off">
+          <button class="send" id="sendBtn" type="submit">Send</button>
+        </form>
+      </div>
+    </section>
 
-				$("#signinForm").on("submit", function(event) {
-					event.preventDefault();
-					var username = $("#signinUsername").val();
-					var password = $("#signinPassword").val();
-					setAuthStatus("", false);
+    <aside class="panel" id="panel" aria-label="Job tracker">
+      <div>
+        <h2>Job tracker</h2>
+        <p class="panel-sub">Jobs from this chat session, read from the server's session store. It updates after each reply; a page reload starts a new session.</p>
+      </div>
+      <div class="jobs" id="jobs"></div>
+      <div class="labels">
+        <h2>What the labels mean</h2>
+        <dl>
+          <div><dt><span class="trust t-verified" data-tier="verified"></span></dt><dd>The proof file was checked against its verification key, and it passed.</dd></div>
+          <div><dt><span class="trust t-provable" data-tier="provable"></span></dt><dd>Your data was found in the study, so a proof can be generated for it.</dd></div>
+          <div><dt><span class="trust t-backed" data-tier="backed"></span></dt><dd>The answer comes from a real call to the prover, such as a submission, status check or download.</dd></div>
+          <div><dt><span class="trust t-unbacked" data-tier="unbacked"></span></dt><dd>The assistant answered on its own, without calling the prover. Treat it as general information.</dd></div>
+        </dl>
+      </div>
+    </aside>
+  </div>
+</div>
 
-					$.ajax({
-						url: '/auth/signin',
-						type: 'POST',
-						contentType: 'application/json',
-						data: JSON.stringify({ username: username, password: password })
-					}).done(function(data) {
-						try {
-							var result = typeof data === 'string' ? JSON.parse(data) : data;
-							if (!result.success) {
-								setAuthStatus(result.error || 'Sign in failed', true);
-								return;
-							}
-							authUser = result.user;
-							renderAuthState();
-							loadMyHash();
-							setAuthStatus(result.created ? 'Account created and signed in.' : 'Signed in.', false);
-							$('#signinPassword').val('');
-						} catch (e) {
-							setAuthStatus('Sign in failed', true);
-						}
-					}).fail(function(xhr) {
-						var msg = 'Sign in failed';
-						try {
-							var err = JSON.parse(xhr.responseText);
-							msg = err.error || err.message || msg;
-						} catch (e) {}
-						setAuthStatus(msg, true);
-					});
-				});
+<script>
+(function () {
+  "use strict";
 
-				$("#logoutBtn").on("click", function() {
-					$.ajax({
-						url: '/auth/logout',
-						type: 'POST'
-					}).always(function() {
-						authUser = null;
-						renderAuthState();
-						setAuthStatus('Logged out.', false);
-					});
-				});
+  // One chat session per page load, as before. The server locks it to the signed-in user.
+  var sessionId = "session_" + Date.now() + "_" + Math.random().toString(36).slice(2, 11);
+  var authUser = null;
+  var verified = {};        // job id -> true, from verify_proof results seen in this session
+  var busy = false;
 
-				$("#saveHashForm").on("submit", function(event) {
-					event.preventDefault();
-					var rawHash = $("#rawHashInput").val();
-					setAuthStatus("", false);
+  var ICONS = {
+    verified: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M8.8 12.2l2.2 2.2 4.4-4.6"/></svg>',
+    provable: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.2-4.2"/></svg>',
+    backed: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="6" rx="1.5"/><rect x="4" y="13" width="16" height="6" rx="1.5"/></svg>',
+    unbacked: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>'
+  };
+  var LABELS = {
+    verified: "Cryptographically verified", provable: "Cryptographically provable",
+    backed: "Backed by COSMeTIC prover", unbacked: "Not backed by COSMeTIC prover"
+  };
+  var TIER_OF = {};
+  Object.keys(LABELS).forEach(function (k) { TIER_OF[LABELS[k]] = k; });
+  var LABEL_RE = /\s*\[(Cryptographically verified|Cryptographically provable|Backed by COSMeTIC prover|Not backed by COSMeTIC prover)\]\s*$/;
+  var TYPES = { KS: ["KS", "Kolmogorov-Smirnov"], LRT: ["LRT", "Likelihood ratio test"], logistic_accuracy: ["ACC", "Logistic accuracy"] };
+  var BOT = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/></svg>';
+  var TICK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
-					$.ajax({
-						url: '/api/me/hash',
-						type: 'POST',
-						contentType: 'application/json',
-						data: JSON.stringify({ raw_hash: rawHash })
-					}).done(function(data) {
-						try {
-							var result = typeof data === 'string' ? JSON.parse(data) : data;
-							if (!result.success) {
-								setAuthStatus(result.error || 'Failed to save hash', true);
-								return;
-							}
-							$("#rawHashInput").val('');
-							var masked = result.hash && result.hash.masked_hash ? result.hash.masked_hash : '';
-							$('#maskedHashText').text(masked ? ('Saved hash: ' + masked) : 'Hash saved.');
-							setAuthStatus('Hash saved successfully.', false);
-						} catch (e) {
-							setAuthStatus('Failed to save hash', true);
-						}
-					}).fail(function(xhr) {
-						var msg = 'Failed to save hash';
-						try {
-							var err = JSON.parse(xhr.responseText);
-							msg = err.error || msg;
-						} catch (e) {}
-						setAuthStatus(msg, true);
-					});
-				});
+  var $ = function (id) { return document.getElementById(id); };
+  var log = $("log");
 
-				$("#messageArea").on("submit", function(event) {
-					const date = new Date();
-					const str_time = formatTime(date);
-					var rawText = $("#text").val();
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
 
-					if (rawText.trim() === "") {
-						event.preventDefault();
-						return;
-					}
+  // Small, safe Markdown subset for replies: escape first, then **bold**, `code`, "- " lists, line breaks.
+  function render(text) {
+    var out = [], list = [];
+    function flush() { if (list.length) { out.push("<ul>" + list.join("") + "</ul>"); list = []; } }
+    String(text).split("\n").forEach(function (raw) {
+      var line = esc(raw).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, "<code>$1</code>");
+      var m = line.match(/^\s*[-*]\s+(.*)$/);
+      if (m) { list.push("<li>" + m[1] + "</li>"); return; }
+      flush();
+      out.push(line.trim() === "" ? "" : line);
+    });
+    flush();
+    return out.join("<br>").replace(/(<br>){3,}/g, "<br><br>").replace(/^(<br>)+|(<br>)+$/g, "");
+  }
 
-					// Store user message for download detection
-					lastUserMessageText = rawText;
+  function badge(tier) { return '<span class="trust t-' + tier + '">' + ICONS[tier] + LABELS[tier] + "</span>"; }
+  function clock(d) { return String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); }
+  function scrollEnd() { log.scrollTop = log.scrollHeight; }
 
-					var userHtml = '<div class="d-flex justify-content-end mb-4"><div class="msg_cotainer_send">' + rawText + '<span class="msg_time_send">'+ str_time + '</span></div><div class="img_cont_msg"><img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="rounded-circle user_img_msg"></div></div>';
-					
-					$("#text").val("");
-					$("#messageFormeight").append(userHtml);
-					$("#messageFormeight").scrollTop($("#messageFormeight")[0].scrollHeight);
+  function addUser(text) {
+    var row = document.createElement("div");
+    row.className = "row me";
+    row.innerHTML = '<div class="bubble"><div>' + esc(text) + '</div><span class="time">' + clock(new Date()) + "</span></div>";
+    log.appendChild(row); scrollEnd();
+  }
 
-					// Show loading indicator
-					var loadingMsgId = 'msg-' + Date.now();
-					var loadingHtml = '<div class="d-flex justify-content-start mb-4" id="' + loadingMsgId + '"><div class="img_cont_msg"><img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img_msg"></div><div class="msg_cotainer"><span class="loading-spinner"></span> Thinking...<span class="msg_time">' + str_time + '</span></div></div>';
-					$("#messageFormeight").append($.parseHTML(loadingHtml));
-					$("#messageFormeight").scrollTop($("#messageFormeight")[0].scrollHeight);
+  function addBot(html, tier, isError) {
+    var row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = '<div class="avatar" aria-hidden="true">' + BOT + '</div><div class="bubble' + (isError ? " error" : "") + '"><div class="text">' + html +
+      '</div><div class="meta">' + (tier ? badge(tier) : "<span></span>") + '<span class="time">' + clock(new Date()) + "</span></div></div>";
+    log.appendChild(row); scrollEnd();
+    return row;
+  }
 
-					$.ajax({
-						data: {
-							msg: rawText,
-							session_id: sessionId
-						},
-						type: "POST",
-						url: "/get",
-					}).done(function(data) {
-						// Remove loading indicator
-						$("#" + loadingMsgId).remove();
-						
-						try {
-							var result = JSON.parse(data);
-							
-							if (result.error) {
-								addBotMessage("Error: " + result.error);
-								return;
-							}
-							
-							var botResponse = result.response || data;
-							addBotMessage(botResponse);
-						} catch (e) {
-							// If response is not JSON, treat as plain text
-							addBotMessage(data);
-						}
-					}).fail(function(xhr) {
-						// Remove loading indicator
-						$("#" + loadingMsgId).remove();
-						
-						var errorMsg = "Sorry, I encountered an error. Please try again.";
-						if (xhr.responseText) {
-							try {
-								var errorData = JSON.parse(xhr.responseText);
-								if (errorData.error) {
-									errorMsg = "Error: " + errorData.error;
-								}
-							} catch (e) {
-								errorMsg = xhr.responseText;
-							}
-						}
-						addBotMessage(errorMsg);
-					});
-					
-					event.preventDefault();
-				});
-			});
-		</script>
-    </body>
+  function addTyping() {
+    var row = addBot('<span class="typing" aria-label="Thinking"><i></i><i></i><i></i></span>', null, false);
+    row.querySelector(".meta").remove();
+    return row;
+  }
+
+  // ---------- Sign-in ----------
+
+  function setStatus(msg, isError) {
+    var el = $("authStatus");
+    el.textContent = msg || "";
+    el.className = "auth-status" + (isError ? " error" : "");
+  }
+
+  function getJSON(url, opts) {
+    return fetch(url, Object.assign({ credentials: "same-origin" }, opts || {})).then(function (r) {
+      return r.text().then(function (t) {
+        var data; try { data = JSON.parse(t); } catch (e) { data = { error: t || ("HTTP " + r.status) }; }
+        return { ok: r.ok, status: r.status, data: data };
+      });
+    });
+  }
+
+  function renderAuth() {
+    $("signinForm").hidden = !!authUser;
+    $("signedIn").hidden = !authUser;
+    $("whoName").textContent = authUser ? (authUser.username || "") : "";
+    if (!authUser) $("whoHash").textContent = "";
+    refreshTracker();
+  }
+
+  function loadHash() {
+    getJSON("/api/me/hash").then(function (r) {
+      $("whoHash").textContent = r.data && r.data.masked_hash ? "hash " + r.data.masked_hash : "no hash saved";
+    }).catch(function () { $("whoHash").textContent = ""; });
+  }
+
+  function refreshAuth() {
+    getJSON("/auth/me").then(function (r) {
+      authUser = r.data && r.data.logged_in ? r.data.user : null;
+      renderAuth();
+      if (authUser) loadHash();
+    }).catch(function () { authUser = null; renderAuth(); });
+  }
+
+  $("signinForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    setStatus("");
+    getJSON("/auth/signin", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: $("signinUsername").value.trim(), password: $("signinPassword").value })
+    }).then(function (r) {
+      if (!r.data.success) { setStatus(r.data.error || "Sign in failed", true); return; }
+      authUser = r.data.user;
+      $("signinPassword").value = "";
+      setStatus("");
+      renderAuth(); loadHash();
+    }).catch(function () { setStatus("Sign in failed", true); });
+  });
+
+  $("logoutBtn").addEventListener("click", function () {
+    fetch("/auth/logout", { method: "POST", credentials: "same-origin" }).finally(function () {
+      authUser = null; verified = {};
+      renderAuth(); setStatus("Logged out.");
+    });
+  });
+
+  // ---------- Chat ----------
+
+  function toolCalls(data) { return Array.isArray(data.tool_calls) ? data.tool_calls : []; }
+
+  function parseMaybe(s) { try { return JSON.parse(s); } catch (e) { return null; } }
+
+  // Facts taken from the real tool results of this turn (EVAL_MODE adds tool_calls to /get).
+  function factsFrom(data) {
+    var facts = { verifiedJob: undefined, download: null };
+    toolCalls(data).forEach(function (tc) {
+      var res = parseMaybe(tc.response || "");
+      if (tc.tool_name === "verify_proof" && res && res.ok === true) {
+        facts.verifiedJob = (tc.arguments_after_correction || tc.arguments || {}).job_id || null; // null: server used the latest completed job
+      }
+      if (tc.tool_name === "download_proof" && res && res.success && res.job_id) {
+        facts.download = { jobId: String(res.job_id), filename: res.filename || ("proofs-" + res.job_id + ".zip") };
+      }
+    });
+    return facts;
+  }
+
+  function send(text) {
+    if (busy) return;
+    busy = true; $("sendBtn").disabled = true;
+    addUser(text);
+    var typing = addTyping();
+    getJSON("/get", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ msg: text, session_id: sessionId })
+    }).then(function (r) {
+      typing.remove();
+      var data = r.data || {};
+      if (data.error || !data.response) {
+        addBot(esc("Something went wrong: " + (data.error || "no reply")), null, true);
+        return;
+      }
+      var reply = String(data.response), tier = null, m = reply.match(LABEL_RE);
+      if (m) { tier = TIER_OF[m[1]]; reply = reply.slice(0, m.index); }
+      var row = addBot(render(reply), tier, false);
+      var facts = factsFrom(data);
+      if (facts.download) addSaveButton(row, facts.download);
+      return refreshTracker(facts.verifiedJob);
+    }).catch(function () {
+      typing.remove();
+      addBot(esc("The server did not answer. Please try again."), null, true);
+    }).finally(function () {
+      busy = false; $("sendBtn").disabled = false; $("msg").focus();
+    });
+  }
+
+  $("chatForm").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var text = $("msg").value.trim();
+    if (!text) return;
+    $("msg").value = "";
+    send(text);
+  });
+
+  // ---------- Saving a downloaded proof to this computer ----------
+
+  function addSaveButton(row, dl) {
+    var wrap = document.createElement("div");
+    wrap.className = "save";
+    var btn = document.createElement("button");
+    btn.type = "button"; btn.className = "btn btn-primary";
+    btn.textContent = "Save " + dl.filename;
+    btn.addEventListener("click", function () { saveProof(dl, btn); });
+    wrap.appendChild(btn);
+    row.querySelector(".text").appendChild(wrap);
+    scrollEnd();
+  }
+
+  function saveProof(dl, btn) {
+    var label = btn.textContent;
+    btn.disabled = true; btn.textContent = "Saving…";
+    var body = new URLSearchParams({ job_id: dl.jobId, session_id: sessionId });
+    fetch("/download_proof", { method: "POST", body: body, credentials: "same-origin" }).then(function (r) {
+      var type = r.headers.get("Content-Type") || "";
+      if (!r.ok || type.indexOf("json") !== -1) {
+        return r.text().then(function (t) { var d = parseMaybe(t) || {}; throw new Error(d.error || t || ("HTTP " + r.status)); });
+      }
+      return r.blob().then(function (blob) {
+        var url = URL.createObjectURL(blob), a = document.createElement("a");
+        a.href = url; a.download = dl.filename; document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(url); a.remove(); }, 200);
+        btn.textContent = "Saved";
+      });
+    }).catch(function (err) {
+      btn.textContent = label;
+      addBot(esc("Could not save the file: " + err.message), null, true);
+    }).finally(function () { btn.disabled = false; });
+  }
+
+  // ---------- Job tracker (read-only, from /context/<session_id>) ----------
+
+  // The server stores naive timestamps from datetime.now(); in the Docker stack that is UTC.
+  // Show them in the viewer's local time, like the chat timestamps.
+  function timeOf(iso) {
+    if (!iso) return "";
+    var d = new Date(/[zZ]|[+-]\d{2}:?\d{2}$/.test(iso) ? iso : iso + "Z");
+    return isNaN(d) ? "" : clock(d);
+  }
+
+  function stepsFor(job) {
+    var st = String(job.status || "").toLowerCase();
+    var done = ["done", "completed", "success"].indexOf(st) !== -1;
+    var failed = ["error", "failed"].indexOf(st) !== -1;
+    var second = done ? ["Done", "on"] : failed ? ["Failed", "bad"] : [st && st !== "unknown" ? st.charAt(0).toUpperCase() + st.slice(1) : "Waiting", "now"];
+    return [
+      ["Submitted", "on"],
+      second,
+      ["Downloaded", job.downloaded_at ? "on" : ""],
+      ["Verified", verified[job.job_id] ? "on verified" : ""]
+    ];
+  }
+
+  function copyText(text, btn) {
+    function done(ok) { btn.textContent = ok ? "Copied" : "Copy failed"; setTimeout(function () { btn.textContent = "Copy"; }, 1200); }
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); });
+      return;
+    }
+    var t = document.createElement("textarea");   // plain-HTTP fallback
+    t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
+    document.body.appendChild(t); t.select();
+    var ok = false; try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    t.remove(); done(ok);
+  }
+
+  function renderJobs(jobs) {
+    var box = $("jobs");
+    box.innerHTML = "";
+    if (!authUser) { box.innerHTML = '<div class="empty">Sign in to see the jobs from this chat session.</div>'; return; }
+    if (!jobs.length) { box.innerHTML = '<div class="empty">No proof jobs yet. Ask in the chat, for example “Prove my data in KS”.</div>'; return; }
+    jobs.forEach(function (job) {
+      var t = TYPES[job.proof_type] || [job.proof_type || "Unknown", "proof type"];
+      var card = document.createElement("article");
+      card.className = "job";
+      card.innerHTML =
+        '<div class="job-type">' + esc(t[0]) + "<small>" + esc(t[1]) + "</small></div>" +
+        '<div class="id-row"><span class="job-id">' + esc(job.job_id) + '</span><button class="copy" type="button">Copy</button></div>' +
+        '<ol class="track" aria-label="Progress of job ' + esc(job.job_id) + '">' +
+        stepsFor(job).map(function (s) {
+          return '<li class="' + s[1] + '"><span class="node">' + (s[1].indexOf("on") === 0 ? TICK : "") + "</span>" + esc(s[0]) + "</li>";
+        }).join("") + "</ol>" +
+        '<div class="asof">' + (verified[job.job_id] ? badge("verified").replace(LABELS.verified, "Verified") : "") +
+        "<span>Status as of " + esc(timeOf(job.updated_at) || "—") + "</span></div>";
+      var btn = card.querySelector(".copy");
+      btn.addEventListener("click", function () { copyText(job.job_id, btn); });
+      box.appendChild(card);
+    });
+  }
+
+  function refreshTracker(verifiedJob) {
+    if (!authUser) { renderJobs([]); return Promise.resolve(); }
+    return getJSON("/context/" + encodeURIComponent(sessionId)).then(function (r) {
+      if (!r.ok || !r.data) { renderJobs([]); return; }
+      var state = r.data.state || {}, jobs = Array.isArray(r.data.jobs) ? r.data.jobs : [];
+      if (verifiedJob !== undefined) {
+        // verify_proof without a job id checks the latest completed job (the server's own fallback).
+        var id = verifiedJob || state.latest_completed_job_id;
+        if (id) verified[String(id)] = true;
+      }
+      renderJobs(jobs);
+      $("trackerToggle").textContent = "Job tracker (" + jobs.length + ")";
+    }).catch(function () { renderJobs([]); });
+  }
+
+  // ---------- Start ----------
+
+  document.querySelectorAll(".labels .trust").forEach(function (el) { el.innerHTML = badge(el.dataset.tier).replace(/^<span[^>]*>|<\/span>$/g, ""); });
+  $("trackerToggle").addEventListener("click", function () {
+    var open = $("body").classList.toggle("panel-open");
+    $("trackerToggle").setAttribute("aria-expanded", String(open));
+  });
+  addBot(render("Hi, I’m the Prover Assistant. Sign in, then ask in plain English whether your data was used in a study, or have me prove, check, download or verify a proof. Your jobs appear in the tracker."), null, false);
+  refreshAuth();
+})();
+</script>
+</body>
 </html>
