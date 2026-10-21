@@ -1080,15 +1080,18 @@ async def check_hash_existence(user_hash: str, application: Optional[str] = None
             found_applications.append(result_info["display_name"])
             # Add details if available
             data = result_info["data"]
+            # Each prover reports where it found the hash with its own field names:
+            # logistic accuracy (log_acc, log_acc_length), KS (s1, s2), LRT (ll_full, ll_reduced).
             details = []
             if data.get("found_in_both"):
                 details.append("found in both")
-            if data.get("found_in_log_acc"):
-                details.append("found in log_acc")
-            if data.get("found_in_log_acc_length"):
-                details.append("found in log_acc_length")
-            if details:
-                response_parts.append(f"✓ **{result_info['display_name']}**: Hash exists. Details: {', '.join(details)}")
+            for field in ("log_acc", "log_acc_length", "s1", "s2", "ll_full", "ll_reduced"):
+                if data.get(f"found_in_{field}"):
+                    details.append(f"found in {field}")
+            # Always report a prover that found the hash, even without details (KS was
+            # silently left out when the hash was in only one of s1 and s2).
+            line = f"✓ **{result_info['display_name']}**: Hash exists"
+            response_parts.append(f"{line}. Details: {', '.join(details)}" if details else line)
         else:
             not_found_applications.append(result_info["display_name"])
             response_parts.append(f"✗ **{result_info['display_name']}**: Hash not found")
