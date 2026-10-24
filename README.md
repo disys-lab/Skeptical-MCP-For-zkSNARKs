@@ -7,7 +7,17 @@
 
 **An LLM agent that lets non-experts run and verify zero-knowledge proofs in plain English, plus an ablation study showing that tools which check, complete or override what the model sends raise task completion by about 23 points across three model families.**
 
-[Paper](manuscript/) · [Reproduce every number offline](#reproducing-the-papers-numbers-offline) · [Architecture deep-dive](ARCHITECTURE.md)
+[Demo video](https://youtu.be/bcwAYV0sb6g) · [Paper](manuscript/) · [Reproduce every number offline](#reproducing-the-papers-numbers-offline) · [Architecture deep-dive](ARCHITECTURE.md)
+
+## Demo
+
+<p align="center">
+  <a href="https://youtu.be/bcwAYV0sb6g">
+    <img src="docs/demo.gif" width="720" alt="Two chat screens. Without the fix, the agent says it can't find a proof job that the job tracker still shows. With the fix, the same status question returns 'Status is done'.">
+  </a>
+</p>
+
+Without the fix (Config B), the model didn't say which analysis the job was for. A default sent the status check to the wrong prover service, and the agent told the user it couldn't find the job. With the fix (Config D), the server fills in the proof type from the stored job before the tool runs. **[Watch the full demo (1:53)](https://youtu.be/bcwAYV0sb6g)** (the demo uses synthetic test accounts).
 
 ## The idea in one minute
 
@@ -88,6 +98,7 @@ The repository also hosts an **ablation study** — four main configurations (A/
 
 ## Contents
 
+- **Want to see it?** → [Demo](#demo)
 - **Want the results?** → [Results at a glance](#results-at-a-glance) · [What we found](#what-we-found) · [Five rules](#five-rules-for-mcp-tool-design-from-the-paper)
 - **Just want to run it?** → [Quick start](#quick-start) · [Example queries](#example-queries). That's all you need — stop after step 4.
 - **Reproducing the research / ablation study?** → [Ablation configs](#ablation-study--configurations) · [Test suite](#running-the-ablation-test-suite) · [Grading](#grading-results) · [Sweeps](#multi-model--multi-config-sweeps)
