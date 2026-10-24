@@ -9,17 +9,17 @@ Md Nazrul Huda Shanto and Paritosh Ramanan · Oklahoma State University
 
 **An LLM agent that lets non-experts run and verify zero-knowledge proofs in plain English, plus an ablation study showing that tools which check, complete or override what the model sends raise task completion by about 23 points across three model families.**
 
-[Demo video](https://youtu.be/MiPHBLRDVGc) · [Paper](manuscript/) · [Reproduce every number offline](#reproducing-the-papers-numbers-offline) · [Architecture deep-dive](ARCHITECTURE.md)
+[Demo video](https://youtu.be/AQkmil7ZKEE) · [Paper](manuscript/) · [Reproduce every number offline](#reproducing-the-papers-numbers-offline) · [Architecture deep-dive](ARCHITECTURE.md)
 
 ## Demo
 
 <p align="center">
-  <a href="https://youtu.be/MiPHBLRDVGc">
+  <a href="https://youtu.be/AQkmil7ZKEE">
     <img src="docs/demo.gif" width="720" alt="Two chat screens. Without the fix, the agent says it can't find a proof job that the job tracker still shows. With the fix, the same status question returns 'Status is done'.">
   </a>
 </p>
 
-Without the fix (Config B), the model didn't say which analysis the job was for. A default sent the status check to the wrong prover service, and the agent told the user it couldn't find the job. With the fix (Config D), the server fills in the proof type from the stored job before the tool runs. **[Watch the full demo (1:55)](https://youtu.be/MiPHBLRDVGc)** (the demo uses synthetic test accounts).
+Without the fix (Config B), the model didn't say which analysis the job was for. A default sent the status check to the wrong prover service, and the agent told the user it couldn't find the job. With the fix (Config D), the server fills in the proof type from the stored job before the tool runs. **[Watch the full demo (1:55)](https://youtu.be/AQkmil7ZKEE)** (the demo uses synthetic test accounts).
 
 ## The idea in one minute
 
