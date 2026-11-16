@@ -5,7 +5,7 @@ Md Nazrul Huda Shanto and Paritosh Ramanan · Oklahoma State University
 [![Reproduce paper numbers](https://github.com/disys-lab/Skeptical-MCP-For-zkSNARKs/actions/workflows/reproduce.yml/badge.svg)](https://github.com/disys-lab/Skeptical-MCP-For-zkSNARKs/actions/workflows/reproduce.yml)
 ![Code: MIT](https://img.shields.io/badge/code-MIT-blue)
 ![Data: CC BY 4.0](https://img.shields.io/badge/data-CC%20BY%204.0-lightgrey)
-![Paper: under review](https://img.shields.io/badge/paper-under%20review%2C%20IEEE%20BigData%202026-orange)
+![Paper: Accepted](https://img.shields.io/badge/paper-under%20review%2C%20IEEE%20BigData%202026-orange)
 
 **An LLM agent that lets non-experts run and verify zero-knowledge proofs in plain English, plus an ablation study showing that tools which check, complete or override what the model sends raise task completion by about 23 points across three model families.**
 
